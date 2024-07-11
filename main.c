@@ -70,7 +70,7 @@ int main() {
 
             wclear(stdscr);
 
-            if (maze_width >= 13) {
+            if (maze_width >= 21) {
                 game_state = END;
                 break;
             }
