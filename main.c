@@ -23,7 +23,7 @@ int main() {
     savetty();
     cbreak();
     noecho();
-    timeout(0);
+    timeout(100);
     leaveok(stdscr, TRUE);
     curs_set(0);
     
@@ -94,7 +94,7 @@ int main() {
             player = init_player(1, 1);
         }
 
-        usleep(100000);
+        refresh();
     }
 
     free_maze(maze);
