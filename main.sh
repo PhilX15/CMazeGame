@@ -1,3 +1,5 @@
+set -e
+
 if [ -f Game ]; then
     rm Game
 fi

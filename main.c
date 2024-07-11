@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "maze.h"
 #include "utils.h"
@@ -68,13 +69,15 @@ int main() {
             collected_coins = 0;
 
             wclear(stdscr);
-            free_maze(maze);
-            free(player);
 
-            if (maze_width == 21) {
+            if (maze_width >= 13) {
                 game_state = END;
                 break;
             }
+
+            free_maze(maze);
+            free(player);
+
             level++;
             maze_width += 2;
             maze_height += 2;
