@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "utils.h"
+#include "maze.h"
 
 struct player_t {
     struct location_t location;
@@ -20,6 +21,7 @@ void move_up(struct player_t *player);
 void move_down(struct player_t *player);
 void move_right(struct player_t *player);
 void move_left(struct player_t *player);
+void move_player(struct maze_t *maze, struct player_t *player, int key);
 
 
 #endif

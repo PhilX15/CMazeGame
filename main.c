@@ -7,7 +7,8 @@
 #include "utils.h"
 #include "player.h"
 
-int level = 1;
+int level = 0;
+const int max_level = 5;
 int maze_width = 13;
 int maze_height = 13;
 
@@ -15,6 +16,50 @@ int level_coins = 5;
 int collected_coins = 0;
 
 enum game_state_t game_state = GAME;
+struct maze_t *maze = NULL;
+struct player_t *player = NULL;
+
+void init_level() {
+    wclear(stdscr);
+    if (maze != NULL) {
+        free_maze(maze);
+        maze = NULL;
+    }
+    if (player != NULL) {
+        free(player);
+        player = NULL;
+    }
+
+    if (level > max_level) {
+        game_state = END;
+        return;
+    }
+
+    collected_coins = 0;
+    level++;
+    maze_width += 2;
+    maze_height += 2;
+
+    if (level % 2 == 0) {
+        level_coins++;
+    }
+
+    maze = init_maze(maze_width, maze_height);
+    int scr_width, scr_height;
+    getmaxyx(stdscr, scr_height, scr_width);
+    maze->top_left_x = (scr_width - maze->width) / 2;
+    maze->top_left_y = (scr_height - maze->height) / 2;
+
+    player = init_player(1, 1);
+
+    create_maze(maze, 1, 1);
+    repair_maze(maze);
+    generate_coins(maze, level_coins);
+}
+
+void print_hud() {
+    mvprintw(1, 1, "Level: %d/%d\tCoins: %d/%d", level, max_level, collected_coins, level_coins);
+}
 
 int main() {
     initscr();
@@ -29,76 +74,39 @@ int main() {
     
     srand(time(0));
 
-    struct maze_t *maze = init_maze(maze_width, maze_height);
-    create_maze(maze, 1, 1);
-    repair_maze(maze);
-    generate_coins(maze, level_coins);
-    print_maze(maze);
+    init_level();
 
-    struct player_t *player = init_player(1, 1);
+    int scr_width = 0;
+    int scr_height = 0;
+    getmaxyx(stdscr, scr_height, scr_width);
     
     while (game_state == GAME) {
-        int key = wgetch(stdscr);
-        switch (key) {
-            case KEY_UP:
-                if (*(*(maze->maze + player->location.y - 1) + player->location.x) == WALL_I) break;
-                player->move_up(player);
-                break;
-            case KEY_DOWN:
-                if (*(*(maze->maze + player->location.y + 1) + player->location.x) == WALL_I) break;
-                player->move_down(player);
-                break;
-            case KEY_RIGHT:
-                if (*(*(maze->maze + player->location.y) + player->location.x + 1) == WALL_I) break;
-                player->move_right(player);
-                break;
-            case KEY_LEFT:
-                if (*(*(maze->maze + player->location.y) + player->location.x - 1) == WALL_I) break;
-                player->move_left(player);
-                break;
-            default:
-                break;
+        int last_width = scr_width;
+        int last_height = scr_height;
+        getmaxyx(stdscr, scr_height, scr_width);
+        if (last_width != scr_width || last_height != scr_height) {
+            wclear(stdscr);
         }
 
-        mvprintw(player->location.y, player->location.x, "%s", PLAYER_S);
+        print_hud();
+        print_maze(maze, scr_width, scr_height);
+        mvprintw(maze->top_left_y + player->location.y, maze->top_left_x + player->location.x, "%s", PLAYER_S);
+        box(stdscr, 0, 0);
+
+        int key = wgetch(stdscr);
+        move_player(maze, player, key);
+
         if (*(*(maze->maze + player->location.y) + player->location.x) == COIN_I) {
             collected_coins++;
             *(*(maze->maze + player->location.y) + player->location.x) = SPACE_I;
         }
         if (collected_coins == level_coins) {
-            collected_coins = 0;
-
-            wclear(stdscr);
-
-            if (maze_width >= 21) {
-                game_state = END;
-                break;
-            }
-
-            free_maze(maze);
-            free(player);
-
-            level++;
-            maze_width += 2;
-            maze_height += 2;
-
-            if (level % 2 == 1) {
-                level_coins++;
-            }
-
-            maze = init_maze(maze_width, maze_height);
-            create_maze(maze, 1, 1);
-            repair_maze(maze);
-            generate_coins(maze, level_coins);
-            print_maze(maze);
-            player = init_player(1, 1);
+            init_level();
         }
 
         refresh();
     }
 
-    free_maze(maze);
-    free(player);
     endwin();
     return 0;
 }

@@ -1,7 +1,6 @@
 #include "maze.h"
 
 struct maze_t *init_maze(int width, int height) {
-
     struct maze_t *maze_struct = malloc(sizeof(struct maze_t));
     if (maze_struct == NULL) {
         return NULL;
@@ -9,6 +8,8 @@ struct maze_t *init_maze(int width, int height) {
 
     maze_struct->width = width;
     maze_struct->height = height;
+    maze_struct->top_left_x = 0;
+    maze_struct->top_left_y = 0;
 
     maze_struct->maze = malloc(height * sizeof(int*));
     if (maze_struct->maze == NULL) {
@@ -105,42 +106,47 @@ void generate_coins(struct maze_t *maze, int count) {
     }
 }
 
-void print_maze(struct maze_t *maze) {
+void print_maze(struct maze_t *maze, int scr_width, int scr_height) {
     if (maze == NULL) {
         return;
     }
+
+    maze->top_left_x = (scr_width - maze->width) / 2;
+    maze->top_left_y = (scr_height - maze->height) / 2;
 
     for (int y = 0; y < maze->height; y++) {
         for (int x = 0; x < maze->width; x++) {
             switch(*(*(maze->maze + y) + x)) {
                 case SPACE_I:
                     attron(COLOR_PAIR(SPACE_I));
-                    printw("%s", SPACE_S);
+                    mvprintw(maze->top_left_y + y, maze->top_left_x + x, "%s", SPACE_S);
                     attroff(COLOR_PAIR(SPACE_I));
                     break;
                 case WALL_I:
                     attron(COLOR_PAIR(WALL_I));
-                    printw("%s", WALL_S);
+                    mvprintw(maze->top_left_y + y, maze->top_left_x + x, "%s", WALL_S);
                     attroff(COLOR_PAIR(WALL_I));
                     break;
                 case TEMP_WALL_I:
                     attron(COLOR_PAIR(SPACE_I));
-                    printw("%s", SPACE_S);
+                    mvprintw(maze->top_left_y + y, maze->top_left_x + x, "%s", SPACE_S);
                     attroff(COLOR_PAIR(SPACE_I));
                     break;
                 case COIN_I:
                     attron(COLOR_PAIR(COIN_I));
-                    printw("%s", COIN_S);
+                    mvprintw(maze->top_left_y + y, maze->top_left_x + x, "%s", COIN_S);
                     attroff(COLOR_PAIR(COIN_I));
                     break;
                 default:
                     attron(COLOR_PAIR(SPACE_I));
-                    printw("%s", SPACE_S);
+                    mvprintw(maze->top_left_y + y, maze->top_left_x + x, "%s", SPACE_S);
                     attroff(COLOR_PAIR(SPACE_I));
             }
         }
         printw("\n");
     }
+
+    move(0, 0);
 }
 
 void free_maze(struct maze_t *maze) {
