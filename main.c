@@ -112,10 +112,13 @@ int main() {
         int key = -1;
         switch (game_state) {
             case MENU:
+                attron(COLOR_PAIR(COIN_I));
                 for (int i = 0; i < 6 && scr_width > strlen(*(logo + i)) && scr_height > 20; i++) {
                     mvprintw(i + 2, scr_width / 2 - strlen(*(logo + i)) / 2, "%s", *(logo + i));
                 }
+                attroff(COLOR_PAIR(COIN_I));
                 box(stdscr, 0, 0);
+                attron(COLOR_PAIR(WALL_I));
                 if (option == 0) {
                     mvprintw(scr_height / 2 - 1, scr_width / 2 - strlen(*play_text) / 2, "%s", *play_text);
                     mvprintw(scr_height / 2 + 1, scr_width / 2 - strlen(*exit_text) / 2, "%s",*(exit_text + 1));
@@ -123,6 +126,7 @@ int main() {
                     mvprintw(scr_height / 2 - 1, scr_width / 2 - strlen(*play_text) / 2, "%s", *(play_text + 1));
                     mvprintw(scr_height / 2 + 1, scr_width / 2 - strlen(*exit_text) / 2, "%s", *exit_text);
                 }
+                attroff(COLOR_PAIR(WALL_I));
 
                 key = wgetch(stdscr);
 
